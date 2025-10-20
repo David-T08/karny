@@ -4,5 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-eframe = "0.33.0"
+eframe = {version = "0.33.0", default-features = false, features = ["wgpu", "wayland", "accesskit", "default_fonts"]}
 egui = "0.33.0"
+egui_extras = "0.33.0"
+wgpu = { version = "*", features = ["webgpu", "webgl"] }

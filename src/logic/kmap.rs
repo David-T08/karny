@@ -1,5 +1,7 @@
 use crate::logic::{
-    gray::{self, gray_sequence}, truth_table::TruthTable, variable::BitValue
+    gray::{self, gray_sequence},
+    truth_table::TruthTable,
+    variable::BitValue,
 };
 
 use std::fmt;
@@ -7,22 +9,18 @@ use std::fmt;
 #[derive(Clone, Debug)]
 pub struct KMapFormat {
     pub row_vars: Vec<String>,
-    pub col_vars: Vec<String>
+    pub col_vars: Vec<String>,
 }
 
 impl KMapFormat {
-    pub fn auto<V>(variables: &[V]) -> Self 
-    where 
+    pub fn auto<V>(variables: &[V]) -> Self
+    where
         V: Clone + Into<String>,
     {
         let variables: Vec<String> = variables.iter().cloned().map(Into::into).collect();
-        
+
         let n = variables.len();
-        let r = if n % 2 == 0 {
-            n / 2
-        } else {
-            n / 2 + 1
-        };
+        let r = if n % 2 == 0 { n / 2 } else { n / 2 + 1 };
 
         Self {
             row_vars: variables[0..r].to_vec(),
@@ -30,11 +28,12 @@ impl KMapFormat {
         }
     }
 
-    pub fn split<V>(variables: &[V], rows: usize, columns: usize) -> Self where 
+    pub fn split<V>(variables: &[V], rows: usize, columns: usize) -> Self
+    where
         V: Clone + Into<String>,
     {
         let variables: Vec<String> = variables.iter().cloned().map(Into::into).collect();
-        
+
         assert_eq!(
             rows + columns,
             variables.len(),
@@ -68,14 +67,15 @@ impl KMap {
     /// - `output_index`: Optional index used for a table with multiple outputs
     pub fn from_table(table: &TruthTable, format: KMapFormat, output_index: Option<usize>) -> Self {
         let variables = table.inputs.clone();
-        
+
         let row_count = 1 << format.row_vars.len();
         let col_count = 1 << format.col_vars.len();
 
         let mut grid = vec![vec![BitValue::Zero; col_count]; row_count];
         for minterm in 0..1u8 << variables.len() {
             let value = &table.rows[minterm as usize].outputs[output_index.unwrap_or(0)];
-            let (r, c) = gray::extract_row_col(minterm, format.row_vars.len(), format.col_vars.len());
+            let (r, c) =
+                gray::extract_row_col(minterm, format.row_vars.len(), format.col_vars.len());
 
             grid[r as usize][c as usize] = value.clone();
         }
@@ -86,8 +86,8 @@ impl KMap {
 
             format,
             variables,
-            
-            grid: grid
+
+            grid: grid,
         }
     }
 }
@@ -99,12 +99,12 @@ impl fmt::Display for KMap {
 
         let rbits = row_vars.len();
         let cbits = col_vars.len();
-        
+
         let col_inner_w = cbits.max(1);
         let row_pad = rbits.max(1) + 1;
-        let left_pad = if cbits > rbits {cbits + 1} else {rbits + 1};
+        let left_pad = if cbits > rbits { cbits + 1 } else { rbits + 1 };
 
-        let cell = |s: &str| format!(" {:^w$} ", s, w = col_inner_w );
+        let cell = |s: &str| format!(" {:^w$} ", s, w = col_inner_w);
         let dash_cell = || "-".repeat(col_inner_w + 2);
 
         let col_hdr_cells = gray_sequence(cbits as u8)
@@ -151,7 +151,7 @@ impl fmt::Display for KMap {
         for (i, row) in self.grid.iter().enumerate() {
             let values = row
                 .iter()
-                .map(|v| cell(&v.to_char().to_string()) )
+                .map(|v| cell(&v.to_char().to_string()))
                 .collect::<Vec<_>>()
                 .join("|");
 
@@ -165,7 +165,13 @@ impl fmt::Display for KMap {
         }
 
         // Bottom border
-        writeln!(f, "{space:>rp$}+{brd}+", space = "", rp = left_pad, brd = border)?;
+        writeln!(
+            f,
+            "{space:>rp$}+{brd}+",
+            space = "",
+            rp = left_pad,
+            brd = border
+        )?;
         Ok(())
     }
 }

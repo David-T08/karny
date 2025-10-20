@@ -43,7 +43,7 @@ impl TruthTable {
                 }
             })
             .collect();
-        
+
         Self {
             inputs,
             outputs,

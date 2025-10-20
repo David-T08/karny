@@ -1,9 +1,10 @@
 use std::fmt;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 pub enum BitValue {
     Zero,
     One,
+    #[default]
     DontCare,
 }
 
@@ -57,96 +58,18 @@ impl fmt::Display for BitValue {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Label {
-    text: String,
-    vertical: bool,
-    clockwise: bool,
+#[derive(Clone, Debug, PartialEq, Default)]
+pub enum VariableKind {
+    #[default]
+    Input,
+    Output,
 }
 
-impl Label {
-    pub fn new<T: Into<String>>(text: T) -> Self {
-        Self {
-            text: text.into(),
-            vertical: false,
-            clockwise: true,
-        }
-    }
-
-    /// Make the label vertical.
-    /// `clockwise = true` → top-to-bottom
-    /// `clockwise = false` → bottom-to-top
-    pub fn vertical(mut self, clockwise: bool) -> Self {
-        self.vertical = true;
-        self.clockwise = clockwise;
-        self
-    }
-}
-
-impl From<String> for Label {
-    fn from(s: String) -> Self {
-        Label::new(s)
-    }
-}
-impl From<&str> for Label {
-    fn from(s: &str) -> Self {
-        Label::new(s)
-    }
-}
-
-impl fmt::Display for Label {
+impl fmt::Display for VariableKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if !self.vertical {
-            return f.write_str(&self.text);
-        }
-
-        let iter = self.text.chars();
-        if !self.clockwise {
-            let v: Vec<char> = iter.collect();
-            for (i, ch) in v.iter().rev().enumerate() {
-                if i > 0 {
-                    f.write_str("\n")?;
-                }
-                write!(f, "{}", ch)?;
-            }
-            return Ok(());
-        }
-
-        for (i, ch) in iter.enumerate() {
-            if i > 0 {
-                f.write_str("\n")?;
-            }
-            write!(f, "{}", ch)?;
-        }
-        Ok(())
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Variable {
-    value: BitValue,
-    name: Label,
-}
-
-impl Variable {
-    pub fn new<T: Into<Label>>(name: T) -> Self {
-        Self {
-            name: name.into(),
-            value: BitValue::Zero,
-        }
-    }
-
-    pub fn toggle(&mut self) {
-        self.value.toggle();
-    }
-
-    pub fn as_char(&self) -> char {
-        self.value.to_char()
-    }
-}
-
-impl fmt::Display for Variable {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} = {}", self.name, self.value)
+        write!(f, "{}", match self {
+            VariableKind::Input => "Input",
+            VariableKind::Output => "Output"
+        })
     }
 }
