@@ -65,7 +65,7 @@ pub fn update(ctx: &egui::Context) {
                         let cur_x = ui.cursor().min.x;
                         let global_center = full_width * 0.5;
                         let left_pad = (global_center - desired * 0.5 - cur_x).max(0.0);
-                        
+
                         ui.add_space(left_pad);
                         ui.label("Middle");
                     });

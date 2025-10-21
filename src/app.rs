@@ -1,9 +1,18 @@
-use eframe::egui;
+use egui::{Frame, Margin, Vec2};
 use std::hash::{Hash, Hasher};
 
 use crate::{
     logic::variable::{BitValue, VariableKind},
-    ui::{self, components::variable_view, modals},
+    ui::{
+        self,
+        components::{
+            properties_view, 
+            variable_view,
+            map_view,
+            table_view
+        },
+        modals,
+    },
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -80,12 +89,36 @@ impl eframe::App for AppState {
             .default_width(280.0)
             .show(ctx, |ui| {
                 variable_view::render(ui, self);
+                ui.separator();
+                properties_view::render(ui, self);
             });
-        
-        egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("Karnaugh Map");
-            ui.label("Main content goes here");
-        });
+
+        egui::CentralPanel::default()
+            .frame(Frame::new().inner_margin(Margin::ZERO))
+            .show(ctx, |ui| {
+                ui.spacing_mut().item_spacing = Vec2::ZERO;
+                ui.spacing_mut().window_margin = Margin::ZERO;
+
+                let frame = Frame::new()
+                    .inner_margin(Margin::ZERO)
+                    .fill(ui.visuals().faint_bg_color) ;
+
+                // Left
+                egui::SidePanel::left("map_view")
+                    .resizable(true)
+                    .frame(frame)
+                    .default_width(ui.available_width() / 2.0)
+                    .show_inside(ui, |ui| {
+                        map_view::render(ui);
+                    });
+
+                // Right
+                egui::CentralPanel::default()
+                    .frame(frame)
+                    .show_inside(ui, |ui| {
+                        table_view::render(ui);
+                    });
+            });
 
         modals::update(ctx, self);
     }

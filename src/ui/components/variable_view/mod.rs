@@ -12,7 +12,7 @@ pub fn render(ui: &mut egui::Ui, app_state: &mut AppState) {
         ui.collapsing("Inputs", |ui| {
             list::render(ui, &mut app_state.variables.inputs, "inputs");
         });
-        
+
         ui.collapsing("Outputs", |ui| {
             list::render(ui, &mut app_state.variables.outputs, "outputs");
         });
