@@ -1,11 +1,7 @@
 use crate::{
     app::AppState,
     logic::variable::{BitValue, VariableKind},
-    ui::components::{
-        textfield::labeled_textfield,
-        dropdown::labeled_dropdown,
-        cycle_button::labeled_cycle_button
-    },
+    ui::components::{cycle_button::labeled_cycle_button, textfield::labeled_textfield},
 };
 
 #[derive(Clone, Debug, Default)]
@@ -18,10 +14,12 @@ pub struct AddVariableState {
 }
 
 pub fn update(ctx: &egui::Context, app_state: &mut AppState) {
-    let modal_state = &mut app_state.modal_states.add_variable;
+    let mut to_finalize: Option<(String, VariableKind, BitValue)> = None;
 
     egui::Modal::new(egui::Id::new("add_variable")).show(ctx, |ui| {
-        ui.set_max_size(egui::Vec2 { x: 240.0, y: 100.0 });
+        let modal_state = &mut app_state.modals.add_variable;
+
+        ui.set_max_size(egui::vec2(240.0, 80.0));
 
         ui.horizontal(|ui| {
             ui.heading("Add New Variable");
@@ -35,22 +33,32 @@ pub fn update(ctx: &egui::Context, app_state: &mut AppState) {
 
         ui.vertical(|ui| {
             ui.set_min_width(200.0);
+
             labeled_textfield(ui, "Name:", &mut modal_state.name, ui.available_width());
-            labeled_cycle_button(ui, "Kind:", &mut modal_state.kind, &[
-                VariableKind::Input,
-                VariableKind::Output
-            ]);
-            labeled_cycle_button(ui, "Value:", &mut modal_state.state, &[
-                BitValue::DontCare,
-                BitValue::Zero,
-                BitValue::One
-            ]);
-            
+
+            labeled_cycle_button(
+                ui,
+                "Kind:",
+                &mut modal_state.kind,
+                &[VariableKind::Input, VariableKind::Output],
+            );
+
             ui.separator();
         });
-        
+
         ui.centered_and_justified(|ui| {
-            ui.add_sized([ui.available_width(), 24.0], egui::Button::new("Finalize"));
-        })
+            if ui.button("Finalize").clicked() {
+                to_finalize = Some((
+                    modal_state.name.clone(),
+                    modal_state.kind.clone(),
+                    modal_state.state,
+                ));
+            }
+        });
     });
+
+    if let Some((name, kind, state)) = to_finalize {
+        app_state.add_variable(&name, kind, state);
+        app_state.modals.add_variable = AddVariableState::default();
+    }
 }

@@ -8,7 +8,7 @@ pub struct ModalState {
 }
 
 pub fn update(ctx: &egui::Context, app_state: &mut AppState) {
-    if app_state.modal_states.add_variable.show {
+    if app_state.modals.add_variable.show {
         add_variable::update(ctx, app_state);
     }
 }

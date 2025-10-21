@@ -1,3 +1,1 @@
-pub fn modal_header() {
-    
-}
+pub fn modal_header() {}

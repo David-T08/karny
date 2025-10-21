@@ -1,4 +1,4 @@
-use std::fmt::{Debug, Display};
+use std::fmt::Debug;
 
 pub fn labeled_dropdown<T>(
     ui: &mut egui::Ui,

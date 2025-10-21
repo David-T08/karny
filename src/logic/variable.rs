@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default, Hash)]
 pub enum BitValue {
     Zero,
     One,
@@ -58,7 +58,7 @@ impl fmt::Display for BitValue {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Default)]
+#[derive(Clone, Debug, PartialEq, Default, Hash, Eq)]
 pub enum VariableKind {
     #[default]
     Input,
@@ -67,9 +67,13 @@ pub enum VariableKind {
 
 impl fmt::Display for VariableKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", match self {
-            VariableKind::Input => "Input",
-            VariableKind::Output => "Output"
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                VariableKind::Input => "Input",
+                VariableKind::Output => "Output",
+            }
+        )
     }
 }
