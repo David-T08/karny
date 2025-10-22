@@ -1,4 +1,4 @@
-use crate::app::Variable;
+use crate::ui::variable::Variable;
 use egui::{Margin, Stroke, TextEdit};
 use egui_dnd::Handle;
 
@@ -24,7 +24,7 @@ pub fn render(ui: &mut egui::Ui, variable: &mut Variable, handle: Handle, index:
                     ui.add(
                         TextEdit::singleline(&mut variable.name)
                             .char_limit(16)
-                            .desired_width(50.0)
+                            .desired_width(ui.available_width() - 40.0)
                             .id_source("name"),
                     );
 

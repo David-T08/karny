@@ -1,7 +1,9 @@
 use crate::{
-    app::AppState,
     logic::variable::{BitValue, VariableKind},
-    ui::components::{cycle_button::labeled_cycle_button, textfield::labeled_textfield},
+    ui::{
+        components::{cycle_button::labeled_cycle_button, textfield::labeled_textfield},
+        events::{EventQueue, VariableEvent},
+    },
 };
 
 #[derive(Clone, Debug, Default)]
@@ -13,12 +15,8 @@ pub struct AddVariableState {
     pub state: BitValue,
 }
 
-pub fn update(ctx: &egui::Context, app_state: &mut AppState) {
-    let mut to_finalize: Option<(String, VariableKind, BitValue)> = None;
-
+pub fn update(ctx: &egui::Context, modal_state: &mut AddVariableState, events: &mut EventQueue) {
     egui::Modal::new(egui::Id::new("add_variable")).show(ctx, |ui| {
-        let modal_state = &mut app_state.modals.add_variable;
-
         ui.set_max_size(egui::vec2(240.0, 80.0));
 
         ui.horizontal(|ui| {
@@ -48,17 +46,14 @@ pub fn update(ctx: &egui::Context, app_state: &mut AppState) {
 
         ui.centered_and_justified(|ui| {
             if ui.button("Finalize").clicked() {
-                to_finalize = Some((
-                    modal_state.name.clone(),
-                    modal_state.kind.clone(),
-                    modal_state.state,
-                ));
+                events.push_variable(VariableEvent::Add { 
+                    name: modal_state.name.clone(), 
+                    kind: modal_state.kind, 
+                    value: modal_state.state 
+                });
+                
+                *modal_state = AddVariableState::default();
             }
         });
     });
-
-    if let Some((name, kind, state)) = to_finalize {
-        app_state.add_variable(&name, kind, state);
-        app_state.modals.add_variable = AddVariableState::default();
-    }
 }

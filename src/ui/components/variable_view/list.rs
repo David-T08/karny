@@ -1,7 +1,7 @@
 use egui_dnd::dnd;
 
 use super::row;
-use crate::app::Variable;
+use crate::ui::variable::Variable;
 
 pub fn render(ui: &mut egui::Ui, variables: &mut Vec<Variable>, id: &'static str) {
     egui::ScrollArea::vertical().show(ui, |ui| {

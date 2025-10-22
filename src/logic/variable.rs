@@ -58,7 +58,7 @@ impl fmt::Display for BitValue {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Default, Hash, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Default, Hash, Eq)]
 pub enum VariableKind {
     #[default]
     Input,

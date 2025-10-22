@@ -2,7 +2,7 @@ use std::fmt;
 
 use crate::logic::variable::BitValue;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct TruthTable {
     pub inputs: Vec<String>,
     pub outputs: Vec<String>,

@@ -1,5 +1,35 @@
-use egui::TopBottomPanel;
+use std::path::PathBuf;
+
+use egui::{
+    PopupCloseBehavior, TopBottomPanel,
+    containers::menu::{MenuButton, MenuConfig},
+};
 use egui_extras::{Size, StripBuilder};
+
+pub enum MenuEvent {
+    NewProject,
+    SaveProject(Option<PathBuf>),
+    OpenProject(PathBuf),
+
+    OpenSettings,
+}
+
+#[derive(Clone, Debug)]
+pub struct WindowState {
+    pub table_view: bool,
+    pub map_view: bool,
+    pub expression_view: bool,
+}
+
+impl Default for WindowState {
+    fn default() -> Self {
+        Self {
+            table_view: true,
+            map_view: true,
+            expression_view: false,
+        }
+    }
+}
 
 pub fn file_menu(ui: &mut egui::Ui) {
     ui.menu_button("File", |ui| {
@@ -21,12 +51,14 @@ pub fn file_menu(ui: &mut egui::Ui) {
     });
 }
 
-pub fn window_menu(ui: &mut egui::Ui) {
-    ui.menu_button("Window", |ui| {
-        ui.checkbox(&mut false, "Table View");
-        ui.checkbox(&mut false, "Map View");
-        ui.checkbox(&mut false, "Expression View");
-    });
+pub fn window_menu(ui: &mut egui::Ui, state: &mut WindowState) {
+    MenuButton::new("Window")
+        .config(MenuConfig::new().close_behavior(PopupCloseBehavior::CloseOnClickOutside))
+        .ui(ui, |ui| {
+            ui.checkbox(&mut state.table_view, "Table View");
+            ui.checkbox(&mut state.map_view, "Map View");
+            ui.checkbox(&mut state.expression_view, "Expression View");
+        });
 }
 
 pub fn preference_menu(ui: &mut egui::Ui) {
@@ -37,7 +69,7 @@ pub fn preference_menu(ui: &mut egui::Ui) {
     });
 }
 
-pub fn update(ctx: &egui::Context) {
+pub fn update(ctx: &egui::Context, window_state: &mut WindowState) {
     TopBottomPanel::top("top_panel").show(ctx, |ui| {
         egui::MenuBar::new().ui(ui, |ui| {
             let full_width = ui.available_width();
@@ -54,7 +86,7 @@ pub fn update(ctx: &egui::Context) {
                     strip.cell(|ui| {
                         ui.horizontal(|ui| {
                             file_menu(ui);
-                            window_menu(ui);
+                            window_menu(ui, window_state);
                             preference_menu(ui);
                         });
                     });

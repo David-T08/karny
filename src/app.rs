@@ -1,74 +1,30 @@
-use egui::{Frame, Margin, Vec2};
-use std::hash::{Hash, Hasher};
+use egui::{CentralPanel, Frame, Margin, SidePanel, Vec2};
 
 use crate::{
-    logic::variable::{BitValue, VariableKind},
+    logic::truth_table::TruthTable,
     ui::{
-        self,
         components::{
-            properties_view, 
-            variable_view,
             map_view,
-            table_view
-        },
-        modals,
+            menubar::{self, WindowState},
+            properties_view, table_view, variable_view,
+        }, 
+        events::{self, EventQueue}, 
+        modals, 
+        variable::*
     },
 };
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct VariableId(u64);
 
 #[derive(Default)]
 pub struct AppState {
     pub modals: modals::ModalState,
-    pub variables: Variables,
+    pub window_state: WindowState,
+    pub variables: VariableStore,
 
-    next_variable_id: u64,
+    pub table: TruthTable,
+    pub events: EventQueue
 }
 
-impl AppState {
-    pub fn next_variable_id(&mut self) -> VariableId {
-        let id = VariableId(self.next_variable_id);
-        self.next_variable_id += 1;
-        id
-    }
-
-    pub fn add_variable(&mut self, name: &str, kind: VariableKind, value: BitValue) {
-        let id = self.next_variable_id();
-        let vec = match kind {
-            VariableKind::Input => &mut self.variables.inputs,
-            VariableKind::Output => &mut self.variables.outputs,
-        };
-
-        vec.push(Variable {
-            id,
-            name: name.to_owned(),
-            kind,
-            value,
-        });
-    }
-}
-
-#[derive(Debug, Default)]
-pub struct Variables {
-    pub inputs: Vec<Variable>,
-    pub outputs: Vec<Variable>,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Variable {
-    pub name: String,
-    pub value: BitValue,
-    pub kind: VariableKind,
-    pub id: VariableId,
-}
-
-// Hash by id ONLY
-impl Hash for Variable {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.id.hash(state);
-    }
-}
+impl AppState {}
 
 pub fn app() -> eframe::Result {
     let native_options = eframe::NativeOptions::default();
@@ -81,9 +37,13 @@ pub fn app() -> eframe::Result {
 
 impl eframe::App for AppState {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        ui::topbar::update(ctx);
+        let events = self.events.take_all();
+        events::dispatch_all(self, events);
+        
+        menubar::update(ctx, &mut self.window_state);
+        modals::update(ctx, self);
 
-        egui::SidePanel::left("left_panel")
+        SidePanel::left("left_panel")
             .resizable(true)
             .width_range(180.0..=720.0)
             .default_width(280.0)
@@ -93,7 +53,9 @@ impl eframe::App for AppState {
                 properties_view::render(ui, self);
             });
 
-        egui::CentralPanel::default()
+        // TODO: Better split pane
+        // Maybe implement egui-dock in the future
+        CentralPanel::default()
             .frame(Frame::new().inner_margin(Margin::ZERO))
             .show(ctx, |ui| {
                 ui.spacing_mut().item_spacing = Vec2::ZERO;
@@ -101,25 +63,25 @@ impl eframe::App for AppState {
 
                 let frame = Frame::new()
                     .inner_margin(Margin::ZERO)
-                    .fill(ui.visuals().faint_bg_color) ;
+                    .fill(ui.visuals().faint_bg_color);
 
                 // Left
-                egui::SidePanel::left("map_view")
-                    .resizable(true)
-                    .frame(frame)
-                    .default_width(ui.available_width() / 2.0)
-                    .show_inside(ui, |ui| {
-                        map_view::render(ui);
-                    });
+                if self.window_state.map_view {
+                    SidePanel::left("map_view")
+                        .resizable(true)
+                        .frame(frame)
+                        .default_width(ui.available_width() / 2.0)
+                        .show_inside(ui, |ui| {
+                            map_view::render(ui);
+                        });
+                }
 
                 // Right
-                egui::CentralPanel::default()
-                    .frame(frame)
-                    .show_inside(ui, |ui| {
-                        table_view::render(ui);
+                if self.window_state.table_view {
+                    CentralPanel::default().frame(frame).show_inside(ui, |ui| {
+                        table_view::render(ui, &mut self.table);
                     });
+                }
             });
-
-        modals::update(ctx, self);
     }
 }
