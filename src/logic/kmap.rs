@@ -66,7 +66,7 @@ impl KMap {
     /// - `format`: Determines row and column count
     /// - `output_index`: Optional index used for a table with multiple outputs
     pub fn from_table(table: &TruthTable, format: KMapFormat, output_index: Option<usize>) -> Self {
-        let variables = table.inputs.clone();
+        let variables = table.variables.inputs.clone();
 
         let row_count = 1 << format.row_vars.len();
         let col_count = 1 << format.col_vars.len();
@@ -85,7 +85,7 @@ impl KMap {
             cols: col_count,
 
             format,
-            variables,
+            variables: variables.iter().map(|v| v.name.clone()).collect(),
 
             grid: grid,
         }

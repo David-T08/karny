@@ -1,6 +1,6 @@
-use crate::logic::truth_table::TruthTable;
+// use crate::ui::variable::VariableStore;
 
-pub fn render(ui: &mut egui::Ui, _table: &TruthTable) {
+pub fn render(ui: &mut egui::Ui) {
     egui::TopBottomPanel::bottom("table_bottom")
         .resizable(true)
         .show_inside(ui, |ui| {

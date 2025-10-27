@@ -1,4 +1,4 @@
-use crate::ui::variable::Variable;
+use crate::logic::variable::Variable;
 use egui::{Margin, Stroke, TextEdit};
 use egui_dnd::Handle;
 
@@ -30,12 +30,7 @@ pub fn render(ui: &mut egui::Ui, variable: &mut Variable, handle: Handle, index:
 
                     ui.add_space(4.0);
 
-                    let resp = ui.button("X");
-                    if resp.clicked() {
-                        variable.value.toggle();
-                    }
-
-                    resp
+                    ui.button("X")
                 });
             });
     });

@@ -1,6 +1,7 @@
 pub mod cycle_button;
 pub mod dropdown;
 pub mod header;
+pub mod label;
 pub mod textfield;
 
 pub mod menubar;

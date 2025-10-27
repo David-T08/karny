@@ -1,16 +1,17 @@
 use egui::{CentralPanel, Frame, Margin, SidePanel, Vec2};
 
 use crate::{
-    logic::truth_table::TruthTable,
+    logic::{truth_table::TruthTable, variable::*},
     ui::{
         components::{
             map_view,
             menubar::{self, WindowState},
-            properties_view, table_view, variable_view,
-        }, 
-        events::{self, EventQueue}, 
-        modals, 
-        variable::*
+            properties_view,
+            table_view::{self, TableViewState},
+            variable_view,
+        },
+        events::{self, EventQueue, VariableEvent},
+        modals,
     },
 };
 
@@ -20,11 +21,16 @@ pub struct AppState {
     pub window_state: WindowState,
     pub variables: VariableStore,
 
+    pub views: AppViews,
+
     pub table: TruthTable,
-    pub events: EventQueue
+    pub events: EventQueue,
 }
 
-impl AppState {}
+#[derive(Default)]
+pub struct AppViews {
+    pub table: TableViewState,
+}
 
 pub fn app() -> eframe::Result {
     let native_options = eframe::NativeOptions::default();
@@ -39,7 +45,38 @@ impl eframe::App for AppState {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         let events = self.events.take_all();
         events::dispatch_all(self, events);
+
+        // Temporary
+        if self.variables.iter().count() == 0 {
+            self.events.push_variable(VariableEvent::Add {
+                name: "A".into(), 
+                kind: VariableKind::Input
+            });
+            
+            self.events.push_variable(VariableEvent::Add {
+                name: "B".into(), 
+                kind: VariableKind::Input
+            });
+            
+            self.events.push_variable(VariableEvent::Add {
+                name: "Carry In".into(), 
+                kind: VariableKind::Input
+            });
+
+            self.events.push_variable(VariableEvent::Add {
+                name: "Sum".into(), 
+                kind: VariableKind::Output
+            });
+            
+            self.events.push_variable(VariableEvent::Add {
+                name: "Carry Out".into(), 
+                kind: VariableKind::Output
+            });
+        };
         
+        self.views.table.vertical_names = true;
+        self.views.table.clockwise = true;
+
         menubar::update(ctx, &mut self.window_state);
         modals::update(ctx, self);
 
@@ -79,7 +116,12 @@ impl eframe::App for AppState {
                 // Right
                 if self.window_state.table_view {
                     CentralPanel::default().frame(frame).show_inside(ui, |ui| {
-                        table_view::render(ui, &mut self.table);
+                        table_view::render(
+                            ui,
+                            &mut self.table,
+                            &mut self.variables,
+                            &mut self.views.table,
+                        );
                     });
                 }
             });

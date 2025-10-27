@@ -1,5 +1,3 @@
-use std::fmt::Debug;
-
 pub fn labeled_cycle_button<T>(
     ui: &mut egui::Ui,
     label: &str,

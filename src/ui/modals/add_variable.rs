@@ -46,12 +46,11 @@ pub fn update(ctx: &egui::Context, modal_state: &mut AddVariableState, events: &
 
         ui.centered_and_justified(|ui| {
             if ui.button("Finalize").clicked() {
-                events.push_variable(VariableEvent::Add { 
-                    name: modal_state.name.clone(), 
-                    kind: modal_state.kind, 
-                    value: modal_state.state 
+                events.push_variable(VariableEvent::Add {
+                    name: modal_state.name.clone(),
+                    kind: modal_state.kind,
                 });
-                
+
                 *modal_state = AddVariableState::default();
             }
         });
