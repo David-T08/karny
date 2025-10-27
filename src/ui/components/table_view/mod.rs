@@ -2,7 +2,7 @@ use crate::logic::{truth_table::TruthTable, variable::VariableStore};
 use egui::{Frame, Margin, Vec2};
 
 mod interactive;
-mod simple;
+mod properties;
 
 #[derive(Default)]
 pub struct TableViewState {
@@ -29,7 +29,7 @@ pub fn render(
     Frame::default().inner_margin(Margin::ZERO).show(ui, |ui| {
         ui.set_min_size(Vec2::new(ui.available_width(), ui.available_height()));
 
-        simple::render(ui);
+        properties::render(ui);
         interactive::render(ui, table, variables, state);
     });
 }

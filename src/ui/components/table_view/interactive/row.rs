@@ -1,12 +1,12 @@
 use egui::{Align, Frame, Layout, Margin, Vec2, vec2};
 
 use super::TableViewState;
-use crate::logic::truth_table::TruthRow;
+use crate::logic::{truth_table::TruthRow, variable::VariableKind};
 
 pub fn render(ui: &mut egui::Ui, row: &mut TruthRow, state: &TableViewState, draw_sep: bool) {
-    let stroke = ui.style().visuals.widgets.noninteractive.bg_stroke;
-    let sep_w = stroke.width.max(1.0);
-    let mut sep_xs: Vec<f32> = Vec::new();
+    let mut stroke = ui.style_mut().visuals.widgets.noninteractive.bg_stroke;
+    let mut sep_w = stroke.width.max(1.0);
+    let mut sep_xs: Vec<(f32, f32)> = Vec::new();
 
     let frame_out = Frame::new().inner_margin(Margin::same(8)).show(ui, |ui| {
         ui.allocate_ui_with_layout(Vec2::ZERO, Layout::left_to_right(Align::Min), |ui| {
@@ -17,7 +17,7 @@ pub fn render(ui: &mut egui::Ui, row: &mut TruthRow, state: &TableViewState, dra
             let total = state.col_widths.len();
 
             for (i, width) in state.col_widths.iter().enumerate() {
-                let text = row.get(i).map(|c| c.to_char()).unwrap_or(' ');
+                let (text, kind) = row.get(i).unwrap();
                 let row_h = ui.text_style_height(&egui::TextStyle::Monospace);
 
                 ui.add_sized(
@@ -26,9 +26,17 @@ pub fn render(ui: &mut egui::Ui, row: &mut TruthRow, state: &TableViewState, dra
                 );
 
                 if i < total - 1 {
+                    if let Some((_, next_kind)) = row.get(i + 1) {
+                        if kind == VariableKind::Input && next_kind == VariableKind::Output {
+                            sep_w = 4.0;
+                        }
+                    }
+
                     let (_, r) = ui.allocate_space(vec2(sep_w, 0.0));
-                    sep_xs.push(r.center().x)
+                    sep_xs.push((r.center().x, sep_w))
                 }
+
+                sep_w = stroke.width.max(1.0);
             }
         });
     });
@@ -38,10 +46,15 @@ pub fn render(ui: &mut egui::Ui, row: &mut TruthRow, state: &TableViewState, dra
     let y_range = outer_rect.y_range();
 
     for x in sep_xs {
-        painter.vline(x, y_range, stroke);
+        stroke.width = x.1;
+        painter.vline(x.0, y_range, stroke);
     }
-    
+
     if draw_sep {
-        painter.hline(outer_rect.x_range(), outer_rect.bottom(), ui.style().visuals.widgets.noninteractive.bg_stroke);
+        painter.hline(
+            outer_rect.x_range(),
+            outer_rect.bottom(),
+            ui.style().visuals.widgets.noninteractive.bg_stroke,
+        );
     }
 }

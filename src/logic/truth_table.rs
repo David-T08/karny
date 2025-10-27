@@ -1,4 +1,4 @@
-use crate::logic::variable::{BitValue, VariableStore};
+use crate::logic::variable::{BitValue, VariableKind, VariableStore};
 
 #[derive(Debug, Default)]
 pub struct TruthTable {
@@ -13,12 +13,15 @@ pub struct TruthRow {
 }
 
 impl TruthRow {
-    pub fn get(&self, index: usize) -> Option<&BitValue> {
+    /// Returns Some((&BitValue, kind)) if `index` is in-bounds, otherwise None.
+    pub fn get(&self, index: usize) -> Option<(&BitValue, VariableKind)> {
         let input_len = self.inputs.len();
         if index < input_len {
-            self.inputs.get(index)
+            self.inputs.get(index).map(|v| (v, VariableKind::Input))
         } else {
-            self.outputs.get(index - input_len)
+            self.outputs
+                .get(index - input_len)
+                .map(|v| (v, VariableKind::Output))
         }
     }
 }
@@ -68,7 +71,8 @@ impl TruthTable {
         }
     }
 
-    pub fn get(&mut self, row: usize, index: usize) -> Option<&BitValue> {
+    /// Returns Some((&BitValue, kind)) if row and index are in-bounds; otherwise None.
+    pub fn get(&self, row: usize, index: usize) -> Option<(&BitValue, VariableKind)> {
         self.rows.get(row).and_then(|r| r.get(index))
     }
 }
