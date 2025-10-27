@@ -8,6 +8,8 @@ mod simple;
 pub struct TableViewState {
     pub vertical_names: bool,
     pub clockwise: bool,
+
+    pub col_widths: Vec<f32>,
 }
 
 pub fn render(

@@ -49,31 +49,31 @@ impl eframe::App for AppState {
         // Temporary
         if self.variables.iter().count() == 0 {
             self.events.push_variable(VariableEvent::Add {
-                name: "A".into(), 
-                kind: VariableKind::Input
-            });
-            
-            self.events.push_variable(VariableEvent::Add {
-                name: "B".into(), 
-                kind: VariableKind::Input
-            });
-            
-            self.events.push_variable(VariableEvent::Add {
-                name: "Carry In".into(), 
-                kind: VariableKind::Input
+                name: "A".into(),
+                kind: VariableKind::Input,
             });
 
             self.events.push_variable(VariableEvent::Add {
-                name: "Sum".into(), 
-                kind: VariableKind::Output
+                name: "B".into(),
+                kind: VariableKind::Input,
             });
-            
+
             self.events.push_variable(VariableEvent::Add {
-                name: "Carry Out".into(), 
-                kind: VariableKind::Output
+                name: "Carry In".into(),
+                kind: VariableKind::Input,
+            });
+
+            self.events.push_variable(VariableEvent::Add {
+                name: "Sum".into(),
+                kind: VariableKind::Output,
+            });
+
+            self.events.push_variable(VariableEvent::Add {
+                name: "Carry Out".into(),
+                kind: VariableKind::Output,
             });
         };
-        
+
         self.views.table.vertical_names = true;
         self.views.table.clockwise = true;
 

@@ -34,11 +34,9 @@ pub fn render(
                                     ui.spacing_mut().item_spacing = Vec2::ZERO;
                                     header::render(ui, variables, state);
                                     
-                                    ui.separator();
-
+                                    let count = table.rows.len();
                                     for (index, row) in table.rows.iter_mut().enumerate() {
-                                        row::render(ui, index, variables, row, state);
-                                        ui.separator();
+                                        row::render(ui, row, state, index != count - 1);
                                     }
                                 });
                             });

@@ -7,7 +7,7 @@ use crate::{
 };
 
 // TODO: Rename variables from header
-pub fn render(ui: &mut egui::Ui, variables: &mut VariableStore, state: &TableViewState) {
+pub fn render(ui: &mut egui::Ui, variables: &mut VariableStore, state: &mut TableViewState) {
     let stroke = ui.style().visuals.widgets.noninteractive.bg_stroke;
     let sep_w = stroke.width.max(1.0);
     let mut sep_xs: Vec<f32> = Vec::new();
@@ -26,7 +26,7 @@ pub fn render(ui: &mut egui::Ui, variables: &mut VariableStore, state: &TableVie
                     separated = true;
                 }
 
-                if var.name.len() > 1 && (state.vertical_names) {
+                let resp = if var.name.len() > 1 && (state.vertical_names) {
                     rotated_label(
                         ui,
                         &var.name,
@@ -36,9 +36,16 @@ pub fn render(ui: &mut egui::Ui, variables: &mut VariableStore, state: &TableVie
                             false => label::Rotation::CounterClockwise,
                         },
                         None,
-                    );
+                    )
                 } else {
-                    ui.label(&var.name);
+                    ui.label(&var.name)
+                };
+
+                let w = resp.rect.width();
+                if state.col_widths.len() <= i {
+                    state.col_widths.push(w);
+                } else {
+                    state.col_widths[i] = w;
                 }
 
                 if i < total - 1 {
@@ -56,4 +63,6 @@ pub fn render(ui: &mut egui::Ui, variables: &mut VariableStore, state: &TableVie
     for x in sep_xs {
         painter.vline(x, y_range, stroke);
     }
+    
+    painter.hline(outer_rect.x_range(), outer_rect.bottom(), ui.style().visuals.widgets.noninteractive.bg_stroke);
 }

@@ -14,7 +14,7 @@ pub fn rotated_label(
     style: TextStyle,
     rot: Rotation,
     color: Option<Color32>,
-) {
+) -> egui::Response {
     let effective_style = ui
         .style()
         .override_text_style
@@ -28,7 +28,7 @@ pub fn rotated_label(
     let galley = ui.fonts_mut(|f| f.layout_no_wrap(text.to_owned(), font_id.clone(), color));
     let size = galley.size();
 
-    let (rect, _) = ui.allocate_exact_size(Vec2::new(size.y, size.x), Sense::hover());
+    let (rect, resp) = ui.allocate_exact_size(Vec2::new(size.y, size.x), Sense::hover());
 
     let mut pos = match rot {
         Rotation::Clockwise => rect.left_top() + vec2(0.0, size.x),
@@ -48,4 +48,6 @@ pub fn rotated_label(
         fallback_color: color,
         opacity_factor: 1.0,
     });
+
+    resp
 }
