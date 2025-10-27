@@ -10,11 +10,21 @@ pub fn render(ui: &mut egui::Ui, app_state: &mut AppState) {
         }
 
         ui.collapsing("Inputs", |ui| {
-            list::render(ui, &mut app_state.variables.inputs, "inputs");
+            list::render(
+                ui,
+                &mut app_state.variables.borrow_mut().inputs,
+                &mut app_state.events,
+                "inputs",
+            );
         });
 
         ui.collapsing("Outputs", |ui| {
-            list::render(ui, &mut app_state.variables.outputs, "outputs");
+            list::render(
+                ui,
+                &mut app_state.variables.borrow_mut().outputs,
+                &mut app_state.events,
+                "outputs",
+            );
         });
     });
 }

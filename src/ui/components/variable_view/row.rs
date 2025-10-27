@@ -1,8 +1,17 @@
-use crate::logic::variable::Variable;
+use crate::{
+    logic::variable::Variable,
+    ui::events::{EventQueue, VariableEvent},
+};
 use egui::{Margin, Stroke, TextEdit};
 use egui_dnd::Handle;
 
-pub fn render(ui: &mut egui::Ui, variable: &mut Variable, handle: Handle, index: String) {
+pub fn render(
+    ui: &mut egui::Ui,
+    variable: &mut Variable,
+    handle: Handle,
+    index: String,
+    events: &mut EventQueue,
+) {
     ui.push_id(variable.id, |ui| {
         egui::Frame::group(ui.style())
             .fill(ui.visuals().extreme_bg_color)
@@ -30,7 +39,9 @@ pub fn render(ui: &mut egui::Ui, variable: &mut Variable, handle: Handle, index:
 
                     ui.add_space(4.0);
 
-                    ui.button("X")
+                    if ui.button("X").clicked() {
+                        events.push_variable(VariableEvent::Remove(variable.id));
+                    }
                 });
             });
     });

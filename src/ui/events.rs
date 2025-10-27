@@ -1,7 +1,4 @@
-use crate::{
-    app::AppState,
-    logic::{truth_table::TruthTable, variable::*},
-};
+use crate::{app::AppState, logic::variable::*};
 
 pub enum VariableEvent {
     Add {
@@ -11,17 +8,46 @@ pub enum VariableEvent {
     },
 
     Remove(VariableId),
-    Rename(VariableId, String),
 }
 
 fn handle_variable_event(state: &mut AppState, ev: VariableEvent) {
     match ev {
-        VariableEvent::Add { name, kind } => state.variables.add(name, kind),
-        VariableEvent::Remove(id) => state.variables.remove(id),
-        VariableEvent::Rename(id, new_name) => state.variables.rename(id, new_name),
+        VariableEvent::Add { name, kind } => {
+            let mut store = state.variables.borrow_mut();
+
+            store.add(name, kind);
+            state.table.add_column(kind);
+        }
+        VariableEvent::Remove(id) => {
+            let (kind, flat_idx, input_idx_opt) = {
+                let store = state.variables.borrow();
+
+                if let Some(i) = store.inputs.iter().position(|v| v.id == id) {
+                    (VariableKind::Input, i, Some(i))
+                } else if let Some(j) = store.outputs.iter().position(|v| v.id == id) {
+                    let flat = store.inputs.len() + j;
+                    (VariableKind::Output, flat, None)
+                } else {
+                    return;
+                }
+            };
+
+            {
+                let mut store = state.variables.borrow_mut();
+                store.remove(id);
+            }
+            match kind {
+                VariableKind::Output => {
+                    state.table.remove_column(flat_idx);
+                }
+                VariableKind::Input => {
+                    state.table.remove_input_and_compact(input_idx_opt.unwrap());
+                }
+            }
+        }
     }
 
-    state.table = TruthTable::new(state.variables.clone())
+    state.table.sync_output_order();
 }
 
 pub enum Event {

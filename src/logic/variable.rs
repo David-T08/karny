@@ -1,7 +1,11 @@
 use std::{
+    cell::RefCell,
     fmt,
     hash::{Hash, Hasher},
+    rc::Rc,
 };
+
+pub type VarStoreHandle = Rc<RefCell<VariableStore>>;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default, Hash)]
 pub enum BitValue {
@@ -118,12 +122,6 @@ impl VariableStore {
         }
     }
 
-    pub fn rename(&mut self, id: VariableId, new_name: String) {
-        if let Some(var) = self.get_variable_by_id_mut(id) {
-            var.name = new_name;
-        }
-    }
-
     pub fn get_variable_by_id(&self, id: VariableId) -> Option<&Variable> {
         self.inputs
             .iter()
@@ -131,6 +129,7 @@ impl VariableStore {
             .find(|v| v.id == id)
     }
 
+    #[allow(dead_code)]
     pub fn get_variable_by_id_mut(&mut self, id: VariableId) -> Option<&mut Variable> {
         self.inputs
             .iter_mut()
@@ -138,6 +137,7 @@ impl VariableStore {
             .find(|v| v.id == id)
     }
 
+    #[allow(dead_code)]
     fn get_corresponding_vec(&self, kind: VariableKind) -> &Vec<Variable> {
         match kind {
             VariableKind::Input => &self.inputs,

@@ -1,4 +1,4 @@
-use crate::logic::{truth_table::TruthTable, variable::VariableStore};
+use crate::logic::{truth_table::TruthTable, variable::VarStoreHandle};
 use egui::{Frame, Margin, Vec2};
 
 mod interactive;
@@ -15,7 +15,7 @@ pub struct TableViewState {
 pub fn render(
     ui: &mut egui::Ui,
     table: &mut TruthTable,
-    variables: &mut VariableStore,
+    variables: VarStoreHandle,
     state: &mut TableViewState,
 ) {
     ui.spacing_mut().item_spacing = Vec2::ZERO;

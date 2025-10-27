@@ -1,5 +1,5 @@
 use crate::{
-    logic::variable::{BitValue, VariableKind},
+    logic::variable::VariableKind,
     ui::{
         components::{cycle_button::labeled_cycle_button, textfield::labeled_textfield},
         events::{EventQueue, VariableEvent},
@@ -12,7 +12,6 @@ pub struct AddVariableState {
 
     pub name: String,
     pub kind: VariableKind,
-    pub state: BitValue,
 }
 
 pub fn update(ctx: &egui::Context, modal_state: &mut AddVariableState, events: &mut EventQueue) {

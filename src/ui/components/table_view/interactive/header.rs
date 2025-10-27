@@ -2,12 +2,12 @@ use egui::{Align, Frame, Layout, Margin, TextStyle, Vec2, vec2};
 
 use super::TableViewState;
 use crate::{
-    logic::variable::{VariableKind, VariableStore},
+    logic::variable::{VarStoreHandle, VariableKind},
     ui::components::label::{self, rotated_label},
 };
 
 // TODO: Rename variables from header
-pub fn render(ui: &mut egui::Ui, variables: &mut VariableStore, state: &mut TableViewState) {
+pub fn render(ui: &mut egui::Ui, variables: VarStoreHandle, state: &mut TableViewState) {
     let mut stroke = ui.style_mut().visuals.widgets.noninteractive.bg_stroke;
     let mut sep_xs: Vec<(f32, f32)> = Vec::new();
 
@@ -18,9 +18,10 @@ pub fn render(ui: &mut egui::Ui, variables: &mut VariableStore, state: &mut Tabl
             ui.spacing_mut().item_spacing = vec2(8.0, 0.0);
             ui.style_mut().override_text_style = Some(egui::TextStyle::Monospace);
 
-            let total = variables.iter().count();
+            let total = { variables.borrow().iter().count() };
 
-            let mut iter = variables.iter_mut().peekable();
+            let mut vars = variables.borrow_mut();
+            let mut iter = vars.iter_mut().peekable();
             let mut i = 0;
 
             while let Some(var) = iter.next() {
@@ -44,6 +45,10 @@ pub fn render(ui: &mut egui::Ui, variables: &mut VariableStore, state: &mut Tabl
                 } else {
                     ui.label(&var.name)
                 };
+
+                if state.col_widths.len() > total {
+                    state.col_widths.truncate(total);
+                }
 
                 let w = resp.rect.width();
                 if state.col_widths.len() <= i {

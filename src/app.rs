@@ -19,12 +19,14 @@ use crate::{
 pub struct AppState {
     pub modals: modals::ModalState,
     pub window_state: WindowState,
-    pub variables: VariableStore,
+    pub variables: VarStoreHandle,
 
     pub views: AppViews,
 
     pub table: TruthTable,
     pub events: EventQueue,
+
+    initialized: bool,
 }
 
 #[derive(Default)]
@@ -43,11 +45,9 @@ pub fn app() -> eframe::Result {
 
 impl eframe::App for AppState {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        let events = self.events.take_all();
-        events::dispatch_all(self, events);
+        if !self.initialized {
+            self.table = TruthTable::new(self.variables.clone());
 
-        // Temporary
-        if self.variables.iter().count() == 0 {
             self.events.push_variable(VariableEvent::Add {
                 name: "A".into(),
                 kind: VariableKind::Input,
@@ -72,10 +72,20 @@ impl eframe::App for AppState {
                 name: "Carry Out".into(),
                 kind: VariableKind::Output,
             });
-        };
+        }
 
-        self.views.table.vertical_names = true;
-        self.views.table.clockwise = true;
+        let events = self.events.take_all();
+        self.table.sync_output_order();
+        events::dispatch_all(self, events);
+
+        if !self.initialized {
+            self.table.set(0, 0, BitValue::One);
+            self.window_state.map_view = false;
+            self.initialized = true;
+        }
+
+        self.views.table.vertical_names = false;
+        self.views.table.clockwise = false;
 
         menubar::update(ctx, &mut self.window_state);
         modals::update(ctx, self);
@@ -86,6 +96,7 @@ impl eframe::App for AppState {
             .default_width(280.0)
             .show(ctx, |ui| {
                 variable_view::render(ui, self);
+
                 ui.separator();
                 properties_view::render(ui, self);
             });
@@ -119,7 +130,7 @@ impl eframe::App for AppState {
                         table_view::render(
                             ui,
                             &mut self.table,
-                            &mut self.variables,
+                            self.variables.clone(),
                             &mut self.views.table,
                         );
                     });
