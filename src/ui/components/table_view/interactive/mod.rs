@@ -36,7 +36,7 @@ pub fn render(
 
                                     let count = table.rows.len();
                                     for (index, row) in table.rows.iter_mut().enumerate() {
-                                        row::render(ui, row, state, index != count - 1);
+                                        row::render(ui, row, state, index, index != count - 1);
                                     }
                                 });
                             });

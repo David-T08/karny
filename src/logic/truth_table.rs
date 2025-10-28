@@ -27,6 +27,17 @@ impl TruthRow {
                 .map(|v| (v, VariableKind::Output))
         }
     }
+
+    pub fn get_mut(&mut self, index: usize) -> Option<(&mut BitValue, VariableKind)> {
+        let input_len = self.inputs.len();
+        if index < input_len {
+            self.inputs.get_mut(index).map(|v| (v, VariableKind::Input))
+        } else {
+            self.outputs
+                .get_mut(index - input_len)
+                .map(|v| (v, VariableKind::Output))
+        }
+    }
 }
 
 impl TruthTable {
@@ -88,6 +99,10 @@ impl TruthTable {
 
                 let mut row = old_rows[old_i].clone();
                 row.inputs.remove(input_idx);
+                row.outputs.iter_mut().for_each(|v| {
+                    *v = BitValue::Zero;
+                });
+                
                 row
             })
             .collect();
